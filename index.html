@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navegador de Cards - Ponto de Cultura</title>
+    
+    <!-- Favicon Oficial -->
+    <link rel="icon" type="image/png" href="https://pontodecultura.github.io/files/LOGOS/COMPILADO/Logo_Barriguda_Web_tv_logo.png">
+
+    <style>
+        :root {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --border: #e2e8f0;
+            --checker-bg: #cbd5e1;
+            --header-bg: #ffffff;
+            --modal-bg: rgba(15, 23, 42, 0.8);
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --checker-bg: #334155;
+            --header-bg: #1e293b;
+            --modal-bg: rgba(0, 0, 0, 0.9);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            padding-bottom: 40px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .brand img {
+            height: 42px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .brand h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .brand p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 24px auto 0 auto;
+            padding: 0 16px;
+        }
+
+        .controls-bar {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 240px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        select, button {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        select:hover, button:hover {
+            border-color: var(--accent);
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: white;
+            border: none;
+        }
+
+        .btn-accent:hover {
+            background: var(--accent-hover);
+        }
+
+        .folder-section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .folder-header {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .badge-count {
+            font-size: 0.75rem;
+            background: var(--bg-body);
+            color: var(--text-secondary);
+            padding: 3px 8px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        /* VISTAS DA GALERIA */
+
+        /* 1. Grid Padrão */
+        .grid-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        /* 2. Grid Compacta */
+        .compact-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+        }
+
+        .compact-view .preview-container {
+            height: 110px;
+        }
+
+        /* 3. Modo Lista */
+        .list-view {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .list-view .card {
+            flex-direction: row;
+            align-items: center;
+            height: auto;
+        }
+
+        .list-view .preview-container {
+            width: 80px;
+            height: 60px;
+            flex-shrink: 0;
+        }
+
+        .list-view .card-body {
+            flex-direction: row;
+            align-items: center;
+            width: 100%;
+        }
+
+        /* 4. Modo Miniaturas (Thumbnails) */
+        .thumb-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 8px;
+        }
+
+        .thumb-view .card-body {
+            display: none;
+        }
+
+        .thumb-view .preview-container {
+            height: 100px;
+            border-radius: 6px;
+        }
+
+        /* Estilo Individual do Card */
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--bg-card);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px -2px rgba(0, 0, 0, 0.08);
+        }
+
+        .preview-container {
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            background-color: var(--bg-body);
+            background-image: linear-gradient(45deg, var(--checker-bg) 25%, transparent 25%), 
+                              linear-gradient(-45deg, var(--checker-bg) 25%, transparent 25%), 
+                              linear-gradient(45deg, transparent 75%, var(--checker-bg) 75%), 
+                              linear-gradient(-45deg, transparent 75%, var(--checker-bg) 75%);
+            background-size: 14px 14px;
+            background-position: 0 0, 0 7px, 7px -7px, -7px 0px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .preview-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .file-icon {
+            font-size: 2.5rem;
+            color: var(--text-secondary);
+        }
+
+        .card-body {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            justify-content: space-between;
+        }
+
+        .file-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            word-break: break-all;
+            line-height: 1.3;
+        }
+
+        .actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .actions button, .actions a {
+            flex: 1;
+            text-align: center;
+            padding: 6px 8px;
+            font-size: 0.75rem;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        .btn-open {
+            background: var(--accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-copy {
+            background: var(--bg-body);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        /* Modal Lightbox */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: var(--modal-bg);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            max-width: 90vw;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .modal-content img {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .modal-caption {
+            color: white;
+            margin-top: 12px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            color: black;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-container">
+        <a href="#" class="brand">
+            <img src="https://pontodecultura.github.io/files/LOGOS/COMPILADO/Logo_Barriguda_Web_tv_logo.png" alt="Barriguda Web TV Logo">
+            <div>
+                <h1>Navegador de Cards</h1>
+                <p>Repositório de mídias e artes - Ponto de Cultura</p>
+            </div>
+        </a>
+        <button onclick="toggleTheme()" id="themeBtn">🌓 Alternar Tema</button>
+    </div>
+</header>
+
+<div class="container">
+    <div class="controls-bar">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Buscar por nome do card ou pasta..." oninput="filterCards()">
+        </div>
+        <div class="filters">
+            <select id="extFilter" onchange="filterCards()">
+                <option value="ALL">Todos os Formatos</option>
+                <option value="png">PNG</option>
+                <option value="jpg">JPG / JPEG</option>
+                <option value="svg">SVG</option>
+                <option value="other">Outros (EXE, TXT, MD)</option>
+            </select>
+
+            <select id="viewSelect" onchange="changeView(this.value)">
+                <option value="grid-view">🖼️ Grade Grande</option>
+                <option value="compact-view">📱 Grade Compacta</option>
+                <option value="list-view">📄 Lista Detalhada</option>
+                <option value="thumb-view">🔲 Miniaturas</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="gallery"></div>
+</div>
+
+<!-- Modal Lightbox -->
+<div id="lightbox" class="modal" onclick="closeModal()">
+    <button class="close-modal">&times;</button>
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <img id="modalImg" src="" alt="Preview">
+        <div id="modalCaption" class="modal-caption"></div>
+    </div>
+</div>
+
+<script>
+    const PAGES_BASE_URL = 'https://pontodecultura.github.io/cards';
+
+    // Lista de arquivos extraídos diretamente do repositório
+    const rawFiles = [
+        "ALLE GOLDIM/CARD_ALE_GOLDIM.png",
+        "ALLE GOLDIM/thumbnail.png",
+        "ALLE GOLDIM/wifi_elemento.png",
+        "AURICEIA ROSA/CARD_MESTRE_AMARAI.png",
+        "AURICEIA ROSA/POST_AURICLEIA_ROSA.png",
+        "AURICLEIA ROSA/CARD_AURICLEIA_ROSA.png",
+        "AURICLEIA ROSA/CARD_AURICLEIA_ROSA_DEPOIMENTO.png",
+        "AURICLEIA ROSA/CARD_MESTRE_AMARAI.png",
+        "AURICLEIA ROSA/thumbnail.png",
+        "CLEIA NEGONA/Cleia_Negona.png",
+        "CLEIA NEGONA/POST_CLEA_NEGONA.png",
+        "CLEIA NEGONA/thumbnail.png",
+        "ELISMARCOS/CARD_ELIMARCOS.png",
+        "ELISMARCOS/POST_ELIMARCOS.png",
+        "ELISMARCOS/thumbnail.png",
+        "GENERICO/Background_barriguda_webtv.jpg",
+        "GENERICO/Barriguda_Not2222icias.png",
+        "GENERICO/CAMARA_DE_VEREADORES.png",
+        "GENERICO/shorts_fundo.png",
+        "GILSON BARBOSA/ChatGPT Image 13 de jul. de 2026, 08_24_52.png",
+        "GILSON BARBOSA/GILSON_BARBOSA.png",
+        "GILSON BARBOSA/POST_QUADRADO_GILSON_BARBOSA.png",
+        "GILSON BARBOSA/thumbnail.png",
+        "GLENDA SOUZA/CARD_GLENDA_SOUZA.png",
+        "GLENDA SOUZA/Glenda_Souza.jpg",
+        "GLENDA SOUZA/Modelo_Glenda_Souzaa.png",
+        "GLENDA SOUZA/POST/POST_GLENDA_SOUZA.png",
+        "GLENDA SOUZA/thumbnail.jpg",
+        "IGOR MANEIRO/thumbnail.jpg",
+        "INDIA CAATINGUEIRA/A_VOZ_DA_CAATINGA.jpg",
+        "INDIA CAATINGUEIRA/ChatGPT Image 29 de jul. de 2026, 11_27_45.png",
+        "INDIA CAATINGUEIRA/readme.txt",
+        "INDIA CAATINGUEIRA/thumbnail.jpg",
+        "INSTITUCIONAL/bg.png",
+        "INSTITUCIONAL/thumbnail.png",
+        "ITALO FREITAS/POST_HELICOPTERO_MUSICAL.png",
+        "ITALO FREITAS/thumbnail.jpg",
+        "JEFFERSON MACIEL/Git-2.56.0.2-64-bit.exe",
+        "JEFFERSON MACIEL/thumbnail.jpg",
+        "MARGO DOURADO/CARD_MARGO_DOURADO.png",
+        "MARGO DOURADO/POST_MARGO_DOURADO.png",
+        "MESTRE JUNIOR/3Modelo_Capoeira_Em_Foco.png",
+        "MESTRE_AMARAI/CARD_MESTRE_AMARAI.png",
+        "MESTRE_AMARAI/POST_MESTRE_AMARAÍ.png",
+        "MÁRIO DOURADO/CARD_MARIO_DOURADO.png",
+        "MÁRIO DOURADO/COVER.png",
+        "MÁRIO DOURADO/POST_MARIO_DOURADO.png",
+        "PERICLES BARRETO/CARD_PERICLES_BARRETO.png",
+        "PERICLES BARRETO/CARD_PERICLES_BARRETO_4k.png",
+        "PERICLES BARRETO/POST_PERICLES_BARRETO.png",
+        "README.md",
+        "SARA ARAUJO/CARD_SARA_ARAUJO.png",
+        "SARA ARAUJO/POST_SARA_ARAUJO.png",
+        "SESSAO/thumbnail.jpg"
+    ];
+
+    // Agrupa arquivos por pasta
+    function groupFiles() {
+        const groups = {};
+        rawFiles.forEach(path => {
+            const parts = path.split('/');
+            let folder = "RAIZ";
+            let file = path;
+
+            if (parts.length > 1) {
+                folder = parts.slice(0, -1).join('/');
+                file = parts[parts.length - 1];
+            }
+
+            if (!groups[folder]) groups[folder] = [];
+            groups[folder].push({
+                fullPath: path,
+                fileName: file
+            });
+        });
+        return groups;
+    }
+
+    function renderGallery() {
+        const gallery = document.getElementById('gallery');
+        gallery.innerHTML = '';
+        const grouped = groupFiles();
+        const currentView = localStorage.getItem('cards_view') || 'grid-view';
+
+        Object.keys(grouped).forEach(folder => {
+            const section = document.createElement('div');
+            section.className = 'folder-section';
+            section.setAttribute('data-folder-name', folder.toLowerCase());
+
+            let cardsHtml = '';
+            grouped[folder].forEach(item => {
+                const encodedPath = item.fullPath.split('/').map(encodeURIComponent).join('/');
+                const fileUrl = `${PAGES_BASE_URL}/${encodedPath}`;
+                const ext = item.fileName.split('.').pop().toLowerCase();
+                const isImage = ['png', 'jpg', 'jpeg', 'svg', 'webp', 'gif'].includes(ext);
+
+                cardsHtml += `
+                    <div class="card" data-file-name="${item.fileName.toLowerCase()}" data-ext="${ext}">
+                        <div class="preview-container" onclick="${isImage ? `openModal('${fileUrl}', '${item.fileName}')` : `window.open('${fileUrl}', '_blank')`}">
+                            ${isImage ? 
+                                `<img src="${fileUrl}" alt="${item.fileName}" loading="lazy" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\"file-icon\">📄</span>';">` : 
+                                `<span class="file-icon">${ext === 'exe' ? '⚙️' : '📄'}</span>`
+                            }
+                        </div>
+                        <div class="card-body">
+                            <div class="file-name" title="${item.fileName}">${item.fileName}</div>
+                            <div class="actions">
+                                <a href="${fileUrl}" target="_blank" class="btn-open">Abrir</a>
+                                <button class="btn-copy" onclick="copyLink('${fileUrl}', this)">Copiar</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            section.innerHTML = `
+                <div class="folder-header">
+                    <span>📁 ${folder}</span>
+                    <span class="badge-count">${grouped[folder].length} itens</span>
+                </div>
+                <div class="grid-container ${currentView}">${cardsHtml}</div>
+            `;
+
+            gallery.appendChild(section);
+        });
+    }
+
+    function changeView(viewClass) {
+        localStorage.setItem('cards_view', viewClass);
+        const containers = document.querySelectorAll('.grid-container');
+        containers.forEach(c => {
+            c.className = `grid-container ${viewClass}`;
+        });
+    }
+
+    function filterCards() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const extFilter = document.getElementById('extFilter').value;
+        const sections = document.querySelectorAll('.folder-section');
+
+        sections.forEach(section => {
+            const folderName = section.getAttribute('data-folder-name');
+            const cards = section.querySelectorAll('.card');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const fileName = card.getAttribute('data-file-name');
+                const ext = card.getAttribute('data-ext');
+
+                const matchesSearch = fileName.includes(query) || folderName.includes(query);
+                
+                let matchesExt = true;
+                if (extFilter === 'png') matchesExt = ext === 'png';
+                else if (extFilter === 'jpg') matchesExt = ['jpg', 'jpeg'].includes(ext);
+                else if (extFilter === 'svg') matchesExt = ext === 'svg';
+                else if (extFilter === 'other') matchesExt = !['png', 'jpg', 'jpeg', 'svg', 'webp', 'gif'].includes(ext);
+
+                if (matchesSearch && matchesExt) {
+                    card.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            section.style.display = visibleCount > 0 ? 'block' : 'none';
+        });
+    }
+
+    function copyLink(url, btn) {
+        navigator.clipboard.writeText(url).then(() => {
+            const orig = btn.innerText;
+            btn.innerText = 'Copiado!';
+            btn.style.background = '#22c55e';
+            btn.style.color = '#fff';
+            setTimeout(() => {
+                btn.innerText = orig;
+                btn.style.background = '';
+                btn.style.color = '';
+            }, 2000);
+        });
+    }
+
+    function toggleTheme() {
+        if (document.body.hasAttribute('data-theme')) {
+            document.body.removeAttribute('data-theme');
+            localStorage.setItem('cards_theme', 'light');
+        } else {
+            document.body.setAttribute('data-theme', 'dark');
+            localStorage.setItem('cards_theme', 'dark');
+        }
+    }
+
+    function openModal(url, caption) {
+        document.getElementById('modalImg').src = url;
+        document.getElementById('modalCaption').innerText = caption;
+        document.getElementById('lightbox').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('lightbox').classList.remove('active');
+    }
+
+    // Carregar configurações salvas
+    (function init() {
+        if (localStorage.getItem('cards_theme') === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+        }
+        
+        const savedView = localStorage.getItem('cards_view');
+        if (savedView) {
+            document.getElementById('viewSelect').value = savedView;
+        }
+
+        renderGallery();
+    })();
+</script>
+
+</body>
+</html>
